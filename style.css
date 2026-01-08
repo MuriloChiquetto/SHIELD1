@@ -1,0 +1,520 @@
+/* ==========================================================================
+   1. VARIÁVEIS E CONFIGURAÇÕES GLOBAIS
+   ========================================================================== */
+:root {
+    --black: #000000;
+    --gray-dark: #0a0a0a;
+    --gray-mid: #141414;
+    --gray-border: #222222;
+    --white: #ffffff;
+    --text-muted: #888888;
+    --font-main: 'IBM Plex Mono', 'Courier New', monospace;
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    box-sizing: border-box;
+    outline: none;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--font-main);
+    height: 100vh;
+    overflow: hidden; /* Impede a rolagem do body para focar na viewport */
+}
+
+/* Fundo Dinâmico (Canvas) */
+#bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   2. SISTEMA DE INTRODUÇÃO (OVERLAY)
+   ========================================================================== */
+#intro-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--black);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 1s ease, visibility 1s ease;
+}
+
+.intro-box {
+    text-align: center;
+}
+
+.logo-glitch {
+    width: 100px;
+    filter: invert(1);
+    margin-bottom: 25px;
+    animation: pulse 2s infinite ease-in-out;
+}
+
+.loader {
+    width: 250px;
+    height: 1px;
+    background: var(--gray-border);
+    margin: 0 auto 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.loader::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 40%;
+    background: var(--white);
+    animation: loading-bar 2s infinite linear;
+}
+
+@keyframes loading-bar {
+    0% { left: -40%; }
+    100% { left: 100%; }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; transform: scale(0.98); }
+    50% { opacity: 1; transform: scale(1); }
+}
+
+/* ==========================================================================
+   3. ESTRUTURA DE LAYOUT PRINCIPAL
+   ========================================================================== */
+.main-layout {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* Sidebar Fixa */
+.sidebar {
+    width: 280px;
+    background: rgba(0, 0, 0, 0.95);
+    border-right: 1px solid var(--gray-border);
+    display: flex;
+    flex-direction: column;
+    padding: 40px 30px;
+    z-index: 100;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 60px;
+    letter-spacing: 2px;
+}
+
+.brand img {
+    width: 32px;
+    filter: invert(1);
+}
+
+.brand span {
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+/* Navegação */
+nav {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nav-link {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    text-align: left;
+    padding: 12px 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: var(--transition);
+    border-bottom: 1px solid transparent;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--white);
+    border-bottom: 1px solid var(--white);
+    padding-left: 5px;
+}
+
+.sidebar-footer {
+    font-size: 0.7rem;
+    color: var(--gray-border);
+    letter-spacing: 1px;
+}
+
+/* ==========================================================================
+   4. ÁREA DE CONTEÚDO (VIEWPORT)
+   ========================================================================== */
+.viewport {
+    flex-grow: 1;
+    height: 100vh;
+    overflow-y: overlay; /* Rolagem moderna */
+    padding: 60px;
+    scroll-behavior: smooth;
+}
+
+/* Estilização da Barra de Rolagem */
+.viewport::-webkit-scrollbar { width: 4px; }
+.viewport::-webkit-scrollbar-track { background: transparent; }
+.viewport::-webkit-scrollbar-thumb { background: var(--gray-border); border-radius: 10px; }
+.viewport::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+.page {
+    display: none;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page.active {
+    display: block;
+    animation: slideIn 0.4s ease-out forwards;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Cabeçalhos de Página */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 50px;
+    border-bottom: 1px solid var(--gray-border);
+    padding-bottom: 20px;
+}
+
+h1, h2 {
+    margin: 0;
+    font-weight: 400;
+    letter-spacing: -1px;
+}
+
+/* ==========================================================================
+   5. COMPONENTES: CARDS E GRADES
+   ========================================================================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Muda de 2 para 3 colunas */
+    gap: 20px;
+    margin-top: 40px;
+}
+
+.data-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
+}
+
+.stat-card, .card {
+    background: var(--gray-mid);
+    border: 1px solid var(--gray-border);
+    padding: 30px;
+    transition: var(--transition);
+}
+
+.card:hover {
+    border-color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.stat-card h3 { font-size: 3.5rem; margin: 0; }
+.stat-card span { font-size: 0.7rem; color: var(--text-muted); letter-spacing: 2px; }
+
+.card h3 { 
+    margin: 0 0 15px 0; 
+    font-size: 1.1rem; 
+    text-transform: uppercase;
+}
+
+.card p { 
+    color: var(--text-muted); 
+    font-size: 0.85rem; 
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+/* ==========================================================================
+   6. BOTÕES E INPUTS
+   ========================================================================== */
+.btn-main {
+    background: var(--white);
+    color: var(--black);
+    border: none;
+    padding: 12px 24px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-main:hover {
+    filter: invert(1);
+}
+
+.btn-delete {
+    background: transparent;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+    padding: 6px 12px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-delete:hover {
+    border-color: #ff0000;
+    color: #ff0000;
+}
+
+/* ==========================================================================
+   7. MODAIS
+   ========================================================================== */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.98);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 5000;
+    backdrop-filter: blur(10px);
+}
+
+.modal.active { display: flex; }
+
+.modal-box {
+    background: var(--gray-mid);
+    padding: 50px;
+    border: 1px solid var(--white);
+    width: 90%;
+    max-width: 550px;
+}
+
+.modal-box h3 { margin-top: 0; margin-bottom: 30px; font-weight: 400; }
+
+.modal-box input, .modal-box textarea {
+    width: 100%;
+    background: var(--black);
+    border: 1px solid var(--gray-border);
+    color: var(--white);
+    padding: 15px;
+    margin-bottom: 20px;
+    font-family: inherit;
+}
+
+.modal-box textarea { min-height: 120px; resize: none; }
+
+.modal-box input:focus { border-color: var(--white); }
+
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.btn-save { flex: 2; }
+.btn-close { flex: 1; background: transparent; color: var(--white); border: 1px solid var(--gray-border); cursor: pointer; }
+
+.agent-card img {
+    width: 100%;
+    aspect-ratio: 6 / 4; /* Mantém a proporção 6x4 solicitada */
+    object-fit: cover;
+    filter: grayscale(1);
+}
+
+.agent-card:hover img {
+    filter: grayscale(0);
+}
+
+#a-courses label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Container em grade para os cursos */
+.courses-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Esconde o checkbox original */
+.course-chip input {
+    display: none;
+}
+
+/* Estilo da borda/caixa do curso */
+.chip-border {
+    border: 1px solid #222;
+    padding: 12px;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #666;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.chip-border:hover {
+    border-color: #444;
+    color: #999;
+}
+
+/* Estilo quando o input estiver marcado (Checked) */
+.course-chip input:checked + .chip-border {
+    border-color: var(--white);
+    color: var(--white);
+    background: rgba(255, 255, 255, 0.1);
+    font-weight: bold;
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.05);
+}
+
+/* Centralizar e remover fundo do saldo total */
+/* Centralização absoluta e remoção de fundo/bordas */
+#total-balance {
+    font-size: 5rem; /* Tamanho imponente */
+    text-align: center;
+    width: 100%;
+    display: block;
+    background: none !important; /* Remove o fundo cinza */
+    border: none !important;     /* Remove as bordas */
+    box-shadow: none !important; /* Remove sombras de caixa */
+    margin: 40px 0;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -2px;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.1); /* Brilho suave tático */
+}
+
+/* Ajuste no container de estatísticas para não prender o saldo em uma grade */
+.stats-grid-finance {
+    display: block; /* Garante que o saldo ocupe a linha toda sozinho */
+    margin-bottom: 50px;
+}
+
+/* Registro financeiro bonitão e arredondado */
+.finance-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--gray-mid);
+    padding: 20px 30px;
+    border-radius: 15px; /* Bordas arredondadas */
+    border: 1px solid var(--gray-border);
+    width: 100%;
+    transition: var(--transition);
+}
+
+.finance-card:hover {
+    border-color: var(--white);
+    transform: scale(1.01); /* Leve destaque ao passar o mouse */
+}
+
+.finance-info h3 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.finance-info p {
+    margin: 5px 0 0 0;
+    color: var(--text-muted);
+}
+#weapons-container, #ammo-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+.armory-card {
+    transition: var(--transition);
+}
+
+.armory-card:hover {
+    border-color: var(--white) !important;
+    background: #111 !important;
+}
+
+/* Container que segura as duas colunas */
+.armory-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Divide em duas colunas iguais */
+    gap: 30px;
+    align-items: start;
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* Títulos das colunas */
+.armory-column h2 {
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--gray-border);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+/* Ajuste para dispositivos móveis (fica uma em cima da outra) */
+@media (max-width: 900px) {
+    .armory-layout {
+        grid-template-columns: 1fr;
+    }
+}
+.search-box {
+    flex: 1;
+    margin: 0 20px;
+}
+
+.search-box input {
+    width: 100%;
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--gray-border);
+    padding: 10px 15px;
+    color: var(--white);
+    font-family: var(--font-main);
+    border-radius: 5px;
+    transition: var(--transition);
+}
+
+.search-box input:focus {
+    border-color: #00ffff;
+    background: rgba(0, 255, 255, 0.05);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+}
