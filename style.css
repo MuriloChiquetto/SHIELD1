@@ -519,3 +519,29 @@ h1, h2 {
     box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
 
 }
+
+/* ... (mantenha o restante do seu código igual) ... */
+
+/* Ajuste na seção de agentes para não ocupar a tela inteira */
+.grid-agents {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Define o tamanho mínimo de 280px por card */
+    gap: 20px;
+    align-items: start;
+}
+
+.agent-card {
+    max-width: 350px; /* Limite máximo para o card não esticar demais em telas grandes */
+    justify-self: center; /* Centraliza o card dentro da sua célula da grade */
+    width: 100%;
+}
+
+.agent-card img {
+    width: 100%;
+    aspect-ratio: 6 / 4;
+    object-fit: cover;
+    filter: grayscale(1);
+    display: block;
+}
+
+/* ... (resto do código) ... */
