@@ -101,11 +101,11 @@
     <div class="page-header">
         <h1>AGENTES ATIVOS</h1>
         <div class="search-box">
-            <input type="text" id="search-agent" placeholder="PESQUISAR AGENTE..." onkeyup="filterAgents()">
+            <input type="text" id="search-agent" placeholder="PESQUISAR AGENTE..." onkeyup="filterGlobal('agents-container', this.value)">
         </div>
         <button class="btn-add" onclick="openModal('agent-modal')">+ RECRUTAR</button>
     </div>
-    <div id="agents-container" class="grid-container"></div>
+    <div id="agents-container" class="grid-agents"></div>
 </section>
 
             <section id="missions" class="page">
@@ -254,4 +254,5 @@
 
 <script src="script.js"></script>
 </body>
+
 </html>
